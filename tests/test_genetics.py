@@ -225,7 +225,7 @@ class TestGenetics(unittest.TestCase):
         num_xovers = 4
         num_xover_points = 1
         p_gene_mutate = 1 / 2
-        p_total_mutate = 1 / 10
+        p_total_mutate = 1 / 2
         output_log_func = TestGenetics.get_output_log
         output_log_path = os.path.join('sample_program_template', 'output.txt')
 

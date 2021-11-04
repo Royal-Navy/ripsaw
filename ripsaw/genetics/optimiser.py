@@ -84,6 +84,9 @@ class Optimiser:
     def epoch(self, chromosomes=list()):
         """ Going through the Evaluate -> Selection -> Crossover -> Mutation process once as an epoch."""
 
+        logging.debug("At start of epoch - Chromo fitness in order:" +
+                      str([chromosome.fitness for chromosome in chromosomes]))
+
         # 1. Generate new chromosomes for each missing
         to_generate = self.population_size - len(chromosomes)
 
@@ -107,14 +110,14 @@ class Optimiser:
                 chromosome.evaluate()
 
         # 3. Logging
-
         for chromosome in chromosomes:
             optimiser_log = [self.internal_dict["epoch_num"]]
             optimiser_log.extend(chromosome.get_log_row())
             self.logger.log_to_csv(optimiser_log)
 
         chromosomes.sort(key=Optimiser.sort_chromosome_key)
-        logging.debug("Chromo fitness in order:" + str([chromosome.fitness for chromosome in chromosomes]))
+        logging.debug("Before Crossover - Chromo fitness in order:" +
+                      str([chromosome.fitness for chromosome in chromosomes]))
 
         scores = [chromosome.get_fitness() for chromosome in chromosomes]
         self.best_score = max(scores)
@@ -126,25 +129,24 @@ class Optimiser:
 
         offspring = point_crossover(chromosomes=selection, num_points=self.num_xover_points)
 
-        chromosomes = chromosomes[self.num_xovers:]  # Cull the weakest.
+        chromosomes = chromosomes[len(offspring):]  # Cull the weakest.
         chromosomes.extend(offspring)
 
         # 5. Mutate
         chromosomes.sort(key=Optimiser.sort_chromosome_key)
-        logging.debug("Chromo fitness in order:" + str([chromosome.fitness for chromosome in chromosomes]))
+        logging.debug("After Crossover - Chromo fitness in order:" +
+                      str([chromosome.fitness for chromosome in chromosomes]))
 
-        max_index = self.population_size - 1
         for i, chromosome in enumerate(chromosomes):
-            if i <= (max_index - 1):  # The minus one offset is to protect the immortal.
+            if chromosome.fitness != self.best_score:  # The minus one offset is to protect the immortal.
                 chromosome.mutate(p_gene_mutate=self.p_gene_mutate,
                                   p_total_mutate=self.p_total_mutate)
             else:
-                logging.debug("Immortal protected, fitness:", chromosomes[i].get_fitness())
+                logging.debug("Immortal protected, fitness:" + str(chromosomes[i].get_fitness()))
 
         return chromosomes
 
     def run(self):
-
         """ In Charge of running epochs until a stopping criteria is met."""
 
         self.best_score = -math.inf

@@ -8,6 +8,7 @@ import numpy as np
 from ripsaw.util.assumptions import chromo_dict_generator
 from ripsaw.local_env_wrapper import LocalEnvWrapper
 import hashlib
+import logging
 
 
 class Chromosome:
@@ -113,11 +114,13 @@ class Chromosome:
         """
 
         if np.random.random() <= p_total_mutate:
+            logging.debug("Total Mutating: " + str(self.uuid) + " Fitness: " + str(self.fitness))
             self.generate_genotype()
             self.reset_fitness()
 
         for gene in self.full_genotype:
             if np.random.random() <= p_gene_mutate:
+                logging.debug("Gene Mutating: " + str(self.uuid) + " Fitness: " + str(self.fitness))
                 gene.mutate(**mutate_params)
                 self.reset_fitness()
 
